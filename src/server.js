@@ -1,5 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { createLogger } from './utils/logger.js';
 import { registerHealthTools } from './tools/health.js';
 import { registerChartTools } from './tools/chart.js';
 import { registerPineTools } from './tools/pine.js';
@@ -15,60 +16,74 @@ import { registerUiTools } from './tools/ui.js';
 import { registerPaneTools } from './tools/pane.js';
 import { registerTabTools } from './tools/tab.js';
 import { registerMorningTools } from './tools/morning.js';
+import { registerTechnicalTools } from './tools/technicals.js';
+import { registerMarketTools } from './tools/market.js';
+import { registerTradeTools } from './tools/trade.js';
+import { registerSystemTools } from './tools/system.js';
+
+const log = createLogger('server');
 
 const server = new McpServer(
   {
     name: 'tradingview',
-    version: '2.1.0',
-    description: 'AI-assisted TradingView chart analysis and Pine Script development via Chrome DevTools Protocol',
+    version: '3.0.0',
+    description: 'AI-assisted TradingView chart analysis, trading tools, and Pine Script development via Chrome DevTools Protocol',
   },
   {
-    instructions: `TradingView MCP — 78 tools for reading and controlling a live TradingView Desktop chart.
+    instructions: `TradingView MCP v3 — 90+ tools for chart analysis, trading, and Pine Script development.
 
-TOOL SELECTION GUIDE — use this to pick the right tool:
+TOOL SELECTION GUIDE:
+
+Quick start — use chart_snapshot for all-in-one context (state + quote + studies + key levels).
 
 Reading your chart:
-- chart_get_state → get symbol, timeframe, all indicator names + entity IDs (call first)
-- data_get_study_values → get current numeric values from ALL visible indicators (RSI, MACD, BB, EMA, etc.)
-- quote_get → get real-time price snapshot (last, OHLC, volume)
-- data_get_ohlcv → get price bars. ALWAYS pass summary=true unless you need individual bars
+- chart_get_state → symbol, timeframe, indicator names + entity IDs
+- chart_snapshot → ALL-IN-ONE: state + quote + study values + key levels in single call
+- data_get_study_values → numeric values from ALL visible indicators
+- quote_get → real-time price snapshot
+- data_get_ohlcv → price bars (ALWAYS use summary=true)
 
-Reading custom Pine indicator output (line.new/label.new/table.new/box.new drawings):
-- data_get_pine_lines → horizontal price levels from custom indicators (deduplicated, sorted)
-- data_get_pine_labels → text annotations with prices ("PDH 24550", "Bias Long", etc.)
-- data_get_pine_tables → table data as formatted rows (session stats, analytics dashboards)
-- data_get_pine_boxes → price zones as {high, low} pairs
-- ALWAYS pass study_filter to target a specific indicator by name (e.g., study_filter="Profiler")
-- Indicators must be VISIBLE on chart for these to work
+Multi-timeframe analysis:
+- market_multi_tf → switch through D/H4/H1/M15, collect Pine data, auto-restore TF
+- market_key_levels → aggregate ALL Pine lines/boxes/labels into unified sorted list
+- market_session_info → active sessions (London/NY/Tokyo), overlaps, time to open
 
-Changing the chart:
-- chart_set_symbol, chart_set_timeframe, chart_set_type → change ticker/resolution/style
-- chart_manage_indicator → add/remove studies. USE FULL NAMES: "Relative Strength Index" not "RSI"
-- chart_scroll_to_date → jump to a date (ISO format)
-- indicator_set_inputs → change indicator settings (length, source, etc.)
+Technical indicators (computed locally, no chart indicator needed):
+- technicals_calculate → SMA, EMA, RSI, ATR, BB, MACD, VWAP from OHLCV data
 
-Pine Script development:
-- pine_set_source → inject code, pine_smart_compile → compile + check errors
-- pine_get_errors → read errors, pine_get_console → read log output
-- WARNING: pine_get_source can return 200KB+ for complex scripts — avoid unless editing
+Trade management:
+- trade_position_size → risk-based lot size (balance, risk%, SL pips)
+- trade_rr_calc → Risk:Reward ratio from entry/SL/TP
+- trade_journal_add → log trade to journal file
+- trade_journal_list → review recent trades
 
-Screenshots: capture_screenshot → regions: "full", "chart", "strategy_tester"
+Pine indicators (line.new/label.new/table.new/box.new):
+- data_get_pine_lines, data_get_pine_labels, data_get_pine_tables, data_get_pine_boxes
+- ALWAYS pass study_filter to target specific indicator
+
+Chart control:
+- chart_set_symbol, chart_set_timeframe, chart_set_type
+- chart_manage_indicator → add/remove (USE FULL NAMES)
+- indicator_set_inputs → change settings
+
+Pine Script: pine_set_source → pine_smart_compile → pine_get_errors
+Screenshots: capture_screenshot → "full", "chart", "strategy_tester"
 Replay: replay_start → replay_step → replay_trade → replay_status → replay_stop
-Batch: batch_run → run action across multiple symbols/timeframes
-Drawing: draw_shape → horizontal_line, trend_line, rectangle, text
-Position tools: draw_context_menu(entity_id) → right-click long/short position → draw_click_menu_item(text)
-Morning: morning_brief → scan watchlist, session_save / session_get → daily persistence
+Drawing: draw_shape → horizontal_line, trend_line, rectangle, text, long_position, short_position
+Position tools: draw_context_menu(entity_id) → draw_click_menu_item(text)
+Morning: morning_brief → scan watchlist with bias scoring
 Alerts: alert_create, alert_list, alert_delete
-Launch: tv_launch → auto-detect and start TradingView with CDP on any platform
-Panes: pane_list, pane_set_layout (s, 2h, 2v, 4, 6, 8), pane_focus, pane_set_symbol
+Batch: batch_run → action across multiple symbols/timeframes
+Panes: pane_list, pane_set_layout, pane_focus, pane_set_symbol
 Tabs: tab_list, tab_new, tab_close, tab_switch
+System: system_info → version, uptime, connection/cache/queue stats
 
 CONTEXT MANAGEMENT:
+- Use chart_snapshot instead of calling 4 separate tools
 - ALWAYS use summary=true on data_get_ohlcv
-- ALWAYS use study_filter on pine tools when you know which indicator you want
-- NEVER use verbose=true unless user specifically asks for raw data
-- Prefer capture_screenshot for visual context over pulling large datasets
-- Call chart_get_state ONCE at start, reuse entity IDs`,
+- ALWAYS use study_filter on pine data tools
+- Prefer capture_screenshot for visual context over large datasets
+- All responses include duration_ms for performance tracking`,
   }
 );
 
@@ -88,9 +103,15 @@ registerUiTools(server);
 registerPaneTools(server);
 registerTabTools(server);
 registerMorningTools(server);
+// v3 new tool groups
+registerTechnicalTools(server);
+registerMarketTools(server);
+registerTradeTools(server);
+registerSystemTools(server);
 
 // Startup notice (stderr so it doesn't interfere with MCP stdio protocol)
-process.stderr.write('⚠  tradingview-mcp  |  Unofficial tool. Not affiliated with TradingView Inc. or Anthropic.\n');
+log.info('TradingView MCP v3.0.0 starting');
+process.stderr.write('  tradingview-mcp v3.0.0  |  Unofficial tool. Not affiliated with TradingView Inc. or Anthropic.\n');
 process.stderr.write('   Ensure your usage complies with TradingView\'s Terms of Use.\n\n');
 
 // Start stdio transport

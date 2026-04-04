@@ -17,11 +17,19 @@ export async function getState() {
           return { id: s.id, name: s.name || s.title || 'unknown' };
         });
       } catch(e) {}
+      var lastBar = null;
+      try {
+        var bars = chart._chartWidget.model().mainSeries().bars();
+        var v = bars.valueAt(bars.lastIndex());
+        if (v) lastBar = { time: v[0], open: v[1], high: v[2], low: v[3], close: v[4], volume: v[5] || 0 };
+      } catch(e) {}
       return {
         symbol: chart.symbol(),
         resolution: chart.resolution(),
         chartType: chart.chartType(),
         studies: studies,
+        study_count: studies.length,
+        last_bar: lastBar,
       };
     })()
   `);

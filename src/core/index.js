@@ -14,3 +14,6 @@ export * as batch from './batch.js';
 export * as watchlist from './watchlist.js';
 export * as indicators from './indicators.js';
 export * as ui from './ui.js';
+export * as technicals from './technicals.js';
+export * as market from './market.js';
+export * as trade from './trade.js';

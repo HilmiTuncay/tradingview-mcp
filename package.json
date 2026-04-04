@@ -1,6 +1,6 @@
 {
   "name": "tradingview-mcp",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "MCP bridge for TradingView Desktop via Chrome DevTools Protocol",
   "type": "module",
   "main": "src/server.js",
@@ -14,12 +14,13 @@
   "scripts": {
     "start": "node src/server.js",
     "tv": "node src/cli/index.js",
-    "test": "node --test tests/e2e.test.js tests/pine_analyze.test.js",
+    "test": "node --test tests/e2e.test.js tests/pine_analyze.test.js tests/utils.test.js",
     "test:e2e": "node --test tests/e2e.test.js",
-    "test:unit": "node --test tests/pine_analyze.test.js tests/cli.test.js",
+    "test:unit": "node --test tests/pine_analyze.test.js tests/cli.test.js tests/utils.test.js",
     "test:cli": "node --test tests/cli.test.js",
-    "test:all": "node --test tests/e2e.test.js tests/pine_analyze.test.js tests/cli.test.js",
-    "test:verbose": "node --test --test-reporter=spec tests/e2e.test.js tests/pine_analyze.test.js",
+    "test:utils": "node --test tests/utils.test.js",
+    "test:all": "node --test tests/e2e.test.js tests/pine_analyze.test.js tests/cli.test.js tests/utils.test.js",
+    "test:verbose": "node --test --test-reporter=spec tests/e2e.test.js tests/pine_analyze.test.js tests/utils.test.js",
     "test:count": "node --test --test-reporter=spec tests/e2e.test.js 2>&1 | tail -5"
   },
   "dependencies": {

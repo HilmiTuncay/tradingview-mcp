@@ -1,37 +1,58 @@
 # TradingView MCP — Claude Instructions
 
-68 tools for reading and controlling a live TradingView Desktop chart via CDP (port 9222).
+90+ tools for reading, analyzing, and controlling a live TradingView Desktop chart via CDP (port 9222).
+
+**v3.0 Highlights:** Built-in technical indicators (SMA/EMA/RSI/ATR/BB/MACD/VWAP), multi-timeframe analysis, trade management (position sizing, R:R calc, journal), structured logging, request queue, auto-reconnect, and cache.
 
 ## Decision Tree — Which Tool When
 
 ### "What's on my chart right now?"
-1. `chart_get_state` → symbol, timeframe, chart type, list of all indicators with entity IDs
-2. `data_get_study_values` → current numeric values from all visible indicators (RSI, MACD, BBands, EMAs, etc.)
-3. `quote_get` → real-time price, OHLC, volume for current symbol
+1. **`chart_snapshot`** → ALL-IN-ONE: state + quote + study values + key levels + session info (USE THIS FIRST)
+2. `chart_get_state` → symbol, timeframe, chart type, indicators + last bar price
+3. `data_get_study_values` → current numeric values from all visible indicators
+4. `quote_get` → real-time price, OHLC, volume
 
 ### "What levels/lines/labels are showing?"
-Custom Pine indicators draw with `line.new()`, `label.new()`, `table.new()`, `box.new()`. These are invisible to normal data tools. Use:
+Custom Pine indicators draw with `line.new()`, `label.new()`, `table.new()`, `box.new()`. Use:
 
-1. `data_get_pine_lines` → horizontal price levels drawn by indicators (deduplicated, sorted high→low)
-2. `data_get_pine_labels` → text annotations with prices (e.g., "PDH 24550", "Bias Long ✓")
-3. `data_get_pine_tables` → table data formatted as rows (e.g., session stats, analytics dashboards)
-4. `data_get_pine_boxes` → price zones / ranges as {high, low} pairs
+1. **`market_key_levels`** → unified sorted list of ALL Pine lines + boxes + labels (USE THIS)
+2. `data_get_pine_lines` → horizontal price levels (deduplicated, sorted high→low)
+3. `data_get_pine_labels` → text annotations with prices
+4. `data_get_pine_tables` → table data formatted as rows
+5. `data_get_pine_boxes` → price zones as {high, low} pairs
 
-Use `study_filter` parameter to target a specific indicator by name substring (e.g., `study_filter: "Profiler"`).
+Use `study_filter` parameter to target a specific indicator by name.
 
 ### "Give me price data"
 - `data_get_ohlcv` with `summary: true` → compact stats (high, low, range, change%, avg volume, last 5 bars)
 - `data_get_ohlcv` without summary → all bars (use `count` to limit, default 100)
 - `quote_get` → single latest price snapshot
 
+### "Multi-timeframe analysis"
+- **`market_multi_tf`** → switch through D/H4/H1/M15, collect Pine labels/lines/OHLCV per TF, auto-restore
+- Use for SMC confluence: D1 bias → H4 structure → H1 entry signals
+
+### "Calculate indicators without adding to chart"
+- **`technicals_calculate`** → SMA, EMA, RSI, ATR, BB, MACD, VWAP from OHLCV data
+- Pure JS — no TradingView indicator needed, instant computation
+
+### "Trade setup analysis"
+- **`trade_rr_calc`** → Risk:Reward ratio from entry/SL/TP, validates direction
+- **`trade_position_size`** → risk-based lot size (balance, risk%, SL pips)
+- **`trade_journal_add`** → log trade setup to journal file
+- **`trade_journal_list`** → review recent journal entries
+
+### "What session is it?"
+- **`market_session_info`** → active sessions (London/NY/Tokyo/Sydney), overlaps, weekend check
+
 ### "Analyze my chart" (full report workflow)
-1. `quote_get` → current price
-2. `data_get_study_values` → all indicator readings
-3. `data_get_pine_lines` → key price levels from custom indicators
-4. `data_get_pine_labels` → labeled levels with context (e.g., "Settlement", "ASN O/U")
-5. `data_get_pine_tables` → session stats, analytics tables
-6. `data_get_ohlcv` with `summary: true` → price action summary
-7. `capture_screenshot` → visual confirmation
+1. `chart_snapshot` → all-in-one context (state + quote + studies + key levels)
+2. `data_get_pine_tables` → session stats, analytics tables
+3. `technicals_calculate` → RSI, ATR for confluence
+4. `capture_screenshot` → visual confirmation
+
+### "System status"
+- **`system_info`** → MCP version, uptime, CDP connection stats, cache/queue stats
 
 ### "Change the chart"
 - `chart_set_symbol` → switch ticker (e.g., "AAPL", "ES1!", "NYMEX:CL1!")
