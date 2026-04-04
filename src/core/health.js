@@ -173,6 +173,8 @@ export async function launch({ port, kill_existing } = {}) {
       `${process.env.LOCALAPPDATA}\\TradingView\\TradingView.exe`,
       `${process.env.PROGRAMFILES}\\TradingView\\TradingView.exe`,
       `${process.env['PROGRAMFILES(X86)']}\\TradingView\\TradingView.exe`,
+      // Microsoft Store (MSIX) installation — resolved at runtime via PowerShell
+      '__MSIX__',
     ],
     linux: [
       '/opt/TradingView/tradingview',
@@ -184,9 +186,25 @@ export async function launch({ port, kill_existing } = {}) {
   };
 
   let tvPath = null;
+  let isMsix = false;
   const candidates = pathMap[platform] || pathMap.linux;
   for (const p of candidates) {
-    if (p && existsSync(p)) { tvPath = p; break; }
+    if (!p) continue;
+    if (p === '__MSIX__') {
+      // Resolve Microsoft Store (MSIX) install path via PowerShell
+      try {
+        const psResult = execSync(
+          'powershell -NoProfile -Command "Get-AppxPackage -Name \'*TradingView*\' | Select-Object -ExpandProperty InstallLocation"',
+          { timeout: 5000 }
+        ).toString().trim().split('\n')[0].trim();
+        if (psResult) {
+          const candidate = `${psResult}\\TradingView.exe`;
+          if (existsSync(candidate)) { tvPath = candidate; isMsix = true; break; }
+        }
+      } catch { /* ignore */ }
+      continue;
+    }
+    if (existsSync(p)) { tvPath = p; break; }
   }
 
   if (!tvPath) {

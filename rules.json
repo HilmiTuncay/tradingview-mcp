@@ -1,0 +1,14 @@
+{
+  "watchlist": ["GBPJPY", "EURUSD", "USDJPY", "GBPUSD", "XAUUSD"],
+  "default_timeframe": "D",
+  "bias_criteria": {
+    "bullish": ["yükseliş", "bullish", "long", "al", "buy", "yukarı"],
+    "bearish": ["düşüş", "bearish", "short", "sat", "sell", "aşağı"]
+  },
+  "risk_rules": [
+    "Maksimum 2 açık işlem",
+    "İşlem başına %1 risk",
+    "Yüksek etkili haber öncesi yeni işlem açma",
+    "Sadece Pepperstone Razor CFD hesabı"
+  ]
+}

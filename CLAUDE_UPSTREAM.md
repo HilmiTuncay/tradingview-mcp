@@ -63,10 +63,24 @@ Use `study_filter` parameter to target a specific indicator by name substring (e
 - `batch_run` with `symbols: ["ES1!", "NQ1!", "YM1!"]` and `action: "screenshot"` or `"get_ohlcv"`
 
 ### "Draw on the chart"
-- `draw_shape` → horizontal_line, trend_line, rectangle, text (pass point + optional point2)
+- `draw_shape` → horizontal_line, trend_line, rectangle, text, **long_position**, **short_position** (pass point + optional point2)
 - `draw_list` → see what's drawn
 - `draw_remove_one` → remove by ID
 - `draw_clear` → remove all
+- `draw_context_menu` → right-click a long/short_position to open context menu (returns menu items)
+- `draw_click_menu_item` → click a menu item (e.g., "Limit Emri Oluştur") after draw_context_menu
+- `draw_get_screen_coords` → get CSS pixel coordinates of a position drawing
+- `draw_get_properties` → get all properties (entry, SL, TP, qty, etc.)
+
+#### Long/Short Position → Broker Order Workflow
+1. `chart_get_state` → get visible range info
+2. `quote_get` → get current price for entry/SL/TP calculation
+3. `draw_shape` with `shape: "long_position"` (or `"short_position"`) — **IMPORTANT:** use a time in the MIDDLE of the visible range, NOT the current time. If entry time equals `vis_to` (right edge), the drawing lands on the price scale and `draw_context_menu` will open the wrong menu.
+4. `draw_get_screen_coords` → verify `body_center_x` is well within canvas bounds (not near `canvas_left + canvas_width`)
+5. `draw_context_menu(entity_id)` → right-click opens position menu with "Limit Emri Oluştur…"
+6. `draw_click_menu_item("Limit Emri Oluştur")` → opens broker order panel
+7. `ui_find_element("LİMİT")` → locate the submit button
+8. `ui_click(by: "data-name", value: "place-and-modify-button")` → submit the order
 
 ### "Manage alerts"
 - `alert_create` → set price alert (condition: "crossing", "greater_than", "less_than")

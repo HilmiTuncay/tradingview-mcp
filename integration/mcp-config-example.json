@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "mt5": {
+      "type": "stdio",
+      "command": "C:\\Users\\algohil\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "args": ["mcp/mt5_server.py"]
+    },
+    "tradingview": {
+      "type": "stdio",
+      "command": "C:\\Program Files\\nodejs\\node.exe",
+      "args": ["D:\\metatrader bot\\tradingview-mcp\\src\\server.js"],
+      "cwd": "D:\\metatrader bot\\tradingview-mcp"
+    }
+  }
+}

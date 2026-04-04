@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node src/server.js --help)",
+      "Bash(curl:*)",
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File \"D:\\\\metatrader bot\\\\scripts\\\\launch-tv.ps1\" 2>&1)",
+      "Read(//mnt/c/Windows/System32/WindowsPowerShell/v1.0/**)",
+      "Read(//mnt/c/Windows/System32/**)",
+      "Bash(/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -ExecutionPolicy Bypass -File \"D:\\\\metatrader bot\\\\scripts\\\\launch-tv.ps1\" 2>&1)",
+      "Bash(/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command \":*)",
+      "Bash(/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command \"\n\\\\$pkg = Get-AppxPackage -Name '*TradingView*' | Select-Object -First 1\nif \\(\\\\$pkg\\) {\n    Write-Host 'InstallLocation: ' + \\\\$pkg.InstallLocation\n    Get-ChildItem \\\\$pkg.InstallLocation -Filter '*.exe' | Select-Object Name, FullName\n}\n\" 2>&1)",
+      "Bash(/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command \"\n\\\\$procs = Get-Process -Name 'tradingview' -ErrorAction SilentlyContinue\nif \\(\\\\$procs\\) { \n    Write-Host 'TradingView caliyor:'\n    \\\\$procs | Select-Object Id, Name, CommandLine | Format-List\n} else { \n    Write-Host 'TradingView sureci YOK'\n}\n\" 2>&1)",
+      "Bash(/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command \"\n\\\\$base = 'C:\\\\Users\\\\algohil\\\\AppData\\\\Local\\\\Packages\\\\31178TradingViewInc.TradingView_q4jpyh43s5mv6\\\\LocalCache\\\\Roaming\\\\TradingView'\nGet-ChildItem \\\\$base -Recurse -Depth 2 | Select-Object FullName | Format-Table -AutoSize\n\" 2>&1)",
+      "Bash(/c/Windows/System32/netstat.exe -ano)",
+      "Bash(/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command \"\n\\\\$r = Invoke-WebRequest -Uri 'http://localhost:9222/json/version' -UseBasicParsing\n\\\\$r.Content\n\" 2>&1)",
+      "Bash(\"/c/Program Files/nodejs/node.exe\" \"D:/metatrader bot/tradingview-mcp/src/server.js\" --help)",
+      "Bash(/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command \"\n\\\\$r = Invoke-WebRequest -Uri 'http://localhost:9222/json' -UseBasicParsing\n\\\\$r.Content | ConvertFrom-Json | Select-Object -First 3 | Format-List\n\" 2>&1)",
+      "Bash(python:*)",
+      "Bash(/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command \"\n\\\\$bytes = [System.IO.File]::ReadAllBytes\\('D:\\\\metatrader bot\\\\scripts\\\\launch-tv.ps1'\\)\n\\\\$text = [System.Text.Encoding]::UTF8.GetString\\(\\\\$bytes\\)\n\\\\$lines = \\\\$text -split '\\\\n'\nWrite-Host 'Line 104 hex:'\n\\\\$line104bytes = [System.Text.Encoding]::UTF8.GetBytes\\(\\\\$lines[103]\\)\n\\(\\\\$line104bytes | ForEach-Object { '{0:X2}' -f \\\\$_ }\\) -join ' '\nWrite-Host 'Line 105 hex:'\n\\\\$line105bytes = [System.Text.Encoding]::UTF8.GetBytes\\(\\\\$lines[104]\\)\n\\(\\\\$line105bytes | ForEach-Object { '{0:X2}' -f \\\\$_ }\\) -join ' '\n\" 2>&1)",
+      "Bash(/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command \"Write-Host '     Start-Process \\\\\"shell:AppsFolder\\\\<AppFamilyName>!App\\\\\"'\" 2>&1)",
+      "Bash(/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command \"\n\\\\$procs = Get-Process -Name 'tradingview' -ErrorAction SilentlyContinue\nWrite-Host \\('TradingView process sayisi: ' + @\\(\\\\$procs\\).Count\\)\n/c/Windows/System32/netstat.exe -ano 2>null | Select-String '9222'\n\" 2>&1)",
+      "Bash(tasklist)",
+      "Bash(timeout 10 node src/server.js)",
+      "Bash(timeout 10 \"C:/Program Files/nodejs/node.exe\" src/server.js)",
+      "Bash(npm install:*)",
+      "Bash(\"C:/Program Files/nodejs/npm.cmd\" install zod@3)",
+      "mcp__tradingview__chart_get_state",
+      "mcp__tradingview__quote_get",
+      "mcp__tradingview__draw_shape",
+      "mcp__tradingview__draw_context_menu",
+      "mcp__tradingview__capture_screenshot",
+      "mcp__tradingview__draw_list",
+      "mcp__tradingview__draw_get_properties",
+      "mcp__tradingview__chart_scroll_to_date",
+      "mcp__tradingview__draw_get_screen_coords",
+      "mcp__tradingview__draw_remove_one",
+      "mcp__tradingview__draw_click_menu_item",
+      "mcp__tradingview__ui_find_element",
+      "mcp__tradingview__ui_click"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "mt5",
+    "tradingview"
+  ]
+}
