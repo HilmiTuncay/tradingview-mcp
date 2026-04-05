@@ -20,6 +20,7 @@ import { registerTechnicalTools } from './tools/technicals.js';
 import { registerMarketTools } from './tools/market.js';
 import { registerTradeTools } from './tools/trade.js';
 import { registerSystemTools } from './tools/system.js';
+import { registerBrokerTools } from './tools/broker.js';
 
 const log = createLogger('server');
 
@@ -57,6 +58,12 @@ Trade management:
 - trade_journal_add → log trade to journal file
 - trade_journal_list → review recent trades
 
+Broker orders (FAST — use these instead of draw_context_menu + draw_click_menu_item):
+- trade_list_positions → list all long/short position drawings with entry/SL/TP
+- trade_open_limit(entity_id) → ONE-SHOT: scroll + right-click + "Limit Emir Oluştur" click
+- trade_submit → click order submit button
+- trade_dismiss → dismiss confirmation dialog
+
 Pine indicators (line.new/label.new/table.new/box.new):
 - data_get_pine_lines, data_get_pine_labels, data_get_pine_tables, data_get_pine_boxes
 - ALWAYS pass study_filter to target specific indicator
@@ -70,7 +77,8 @@ Pine Script: pine_set_source → pine_smart_compile → pine_get_errors
 Screenshots: capture_screenshot → "full", "chart", "strategy_tester"
 Replay: replay_start → replay_step → replay_trade → replay_status → replay_stop
 Drawing: draw_shape → horizontal_line, trend_line, rectangle, text, long_position, short_position
-Position tools: draw_context_menu(entity_id) → draw_click_menu_item(text)
+Position tools (legacy): draw_context_menu(entity_id) → draw_click_menu_item(text)
+Broker order (PREFERRED): trade_list_positions → trade_open_limit → trade_submit
 Morning: morning_brief → scan watchlist with bias scoring
 Alerts: alert_create, alert_list, alert_delete
 Batch: batch_run → action across multiple symbols/timeframes
@@ -108,6 +116,7 @@ registerTechnicalTools(server);
 registerMarketTools(server);
 registerTradeTools(server);
 registerSystemTools(server);
+registerBrokerTools(server);
 
 // Startup notice (stderr so it doesn't interfere with MCP stdio protocol)
 log.info('TradingView MCP v3.0.0 starting');
