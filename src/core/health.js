@@ -237,8 +237,29 @@ export async function launch({ port, kill_existing } = {}) {
     } catch { /* may not be running */ }
   }
 
-  const child = spawn(tvPath, [`--remote-debugging-port=${cdpPort}`], { detached: true, stdio: 'ignore' });
-  child.unref();
+  let launchPid = null;
+  if (isMsix) {
+    // MSIX (Microsoft Store) version: cannot spawn directly ("Access is denied").
+    // Working method: run powershell.exe inside the package context via
+    // Invoke-CommandInDesktopPackage, which can then launch TradingView.exe with args.
+    // Requires Developer Mode (Tools.DeveloperMode.Core Windows capability) to be installed.
+    try {
+      const pfn = execSync(
+        'powershell -NoProfile -Command "(Get-AppxPackage -Name \'*TradingView*\').PackageFamilyName"',
+        { timeout: 5000 }
+      ).toString().trim().split('\n')[0].trim();
+      execSync(
+        `powershell -NoProfile -Command "Invoke-CommandInDesktopPackage -PackageFamilyName '${pfn}' -AppId 'TradingView.Desktop' -Command 'powershell.exe' -Args '-NoProfile -NonInteractive -Command \\"& \\'${tvPath}\\' --remote-debugging-port=${cdpPort}\\"'"`,
+        { timeout: 15000 }
+      );
+    } catch (e) {
+      throw new Error(`MSIX launch failed. Ensure Developer Mode (Tools.DeveloperMode.Core) is installed. Error: ${e.message}`);
+    }
+  } else {
+    const child = spawn(tvPath, [`--remote-debugging-port=${cdpPort}`], { detached: true, stdio: 'ignore' });
+    child.unref();
+    launchPid = child.pid;
+  }
 
   for (let i = 0; i < 15; i++) {
     await new Promise(r => setTimeout(r, 1000));
